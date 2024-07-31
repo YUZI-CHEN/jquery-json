@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>sideproject2</title>
+    <!-- 引入 jQuery 庫 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+            white-space: nowrap; /* 防止文本换行 */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .pagination button {
+            padding: 8px 16px;
+            margin: 0 4px;
+            border: 1px solid #ddd;
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        .pagination button.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        /* 固定每列的宽度 */
+        th:nth-child(1), td:nth-child(1) { width: 100px; } /* 影片編號 */
+        th:nth-child(2), td:nth-child(2) { width: 200px; } /* 影片名稱 */
+        th:nth-child(3), td:nth-child(3) { width: 100px; } /* 片長 */
+        th:nth-child(4), td:nth-child(4) { width: 150px; } /* 影片分類 */
+        th:nth-child(5), td:nth-child(5) { width: 250px; } /* 影片簡介 */
+        th:nth-child(6), td:nth-child(6) { width: 150px; } /* 授權單位 */
+        th:nth-child(7), td:nth-child(7) { width: 200px; } /* Youtube連結 */
+        th:nth-child(8), td:nth-child(8) { width: 100px; } /* ID */
+    </style>
+    <script>
+        $(document).ready(function() {
+            var currentPage = 1;
+            var itemsPerPage = 10;
+            var data = [];
+
+            function renderTable(page) {
+                var tableBody = $('#dataTable tbody');
+                tableBody.empty(); // 清空表格
+
+                var startIndex = (page - 1) * itemsPerPage;
+                var endIndex = Math.min(startIndex + itemsPerPage, data.length);
+
+                for (var i = startIndex; i < endIndex; i++) {
+                    var item = data[i];
+                    var row = $('<tr></tr>');
+                    row.append($('<td></td>').text(item.影片編號));
+                    row.append($('<td></td>').text(item.影片名稱));
+                    row.append($('<td></td>').text(item.片長));
+                    row.append($('<td></td>').text(item.影片分類));
+                    row.append($('<td></td>').text(item.影片簡介));
+                    row.append($('<td></td>').text(item.授權單位));
+                    row.append($('<td></td>').text(item.Youtube連結));
+                    row.append($('<td></td>').text(item.ID));
+                    tableBody.append(row);
+                }
+
+                renderPagination();
+            }
+
+            function renderPagination() {
+                var pagination = $('.pagination');
+                pagination.empty();
+
+                var totalPages = Math.ceil(data.length / itemsPerPage);
+
+                var prevButton = $('<button></button>').text('上一頁');
+                if (currentPage === 1) {
+                    prevButton.addClass('disabled');
+                } else {
+                    prevButton.on('click', function() {
+                        currentPage--;
+                        renderTable(currentPage);
+                    });
+                }
+
+                var nextButton = $('<button></button>').text('下一頁');
+                if (currentPage === totalPages) {
+                    nextButton.addClass('disabled');
+                } else {
+                    nextButton.on('click', function() {
+                        currentPage++;
+                        renderTable(currentPage);
+                    });
+                }
+
+                var pageInfo = $('<span></span>').addClass('page-info').text('第 ' + currentPage + ' 頁，共 ' + totalPages + ' 頁');
+
+                pagination.append(prevButton);
+                pagination.append(pageInfo);
+                pagination.append(nextButton);
+            }
+
+            $.ajax({
+                type: 'GET',
+                url: 'https://data.moa.gov.tw/service/opendata/VirtualMuseumAgri.aspx?IsTransData=1&UnitId=382',
+                dataType: 'json',
+                success: function(responseData) {
+                    console.log(responseData);
+                    data = responseData;
+                    renderTable(currentPage);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error: ' + textStatus, errorThrown);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <table id="dataTable" border="1">
+        <thead>
+            <tr>
+                <th>影片編號</th>
+                <th>影片名稱</th>
+                <th>片長</th>
+                <th>影片分類</th>
+                <th>影片簡介</th>
+                <th>授權單位</th>
+                <th>Youtube連結</th>
+                <th>ID</th>            
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 數據將插入到這裡 -->
+        </tbody>
+    </table>
+    <div class="pagination"></div>
+</body>
+</html>
